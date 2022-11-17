@@ -1,0 +1,6 @@
+<launch>
+  <!-- launch script for cpp autonomy of flyappy  -->
+
+  <node name="flyappy_autonomy_code" pkg="flyappy_autonomy_code" type="flyappy_autonomy_code_node" output="screen" />
+  <node name="flyappy_main_game" pkg="flyappy_main_game" type="flyappy.py" output="screen" required="true" />
+</launch>

@@ -1,0 +1,20 @@
+---
+Language:        Cpp
+BasedOnStyle:  Google
+
+AccessModifierOffset: -2
+AllowShortIfStatementsOnASingleLine: true
+AlwaysBreakTemplateDeclarations: true
+BreakBeforeBraces: Allman
+BreakBeforeTernaryOperators: false
+ColumnLimit:     90
+CommentPragmas:  '^ IWYU pragma:'
+ContinuationIndentWidth: 8
+IndentWidth:     4
+IndentCaseLabels: true
+KeepEmptyLinesAtTheStartOfBlocks: true
+NamespaceIndentation: None
+PointerAlignment: Left
+SpaceAfterTemplateKeyword: false
+Standard: Cpp11
+...
