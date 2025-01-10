@@ -15,91 +15,100 @@ runs out!
 
 ## Getting Started
 
+Clone the repository:
+```
+git clone https://github.com/Flyability/flyappy_autonomy_test_public.git
+cd flyappy_autonomy_test_public
+```
+
 ### Setup the running environment
 
-*This game has been tested with Ubuntu 20.04 running ROS Noetic and Python 3.8.10.*
+*This game has been tested with Ubuntu 24.04 running ROS2 Jazzy and Python 3.12.*
 
-There are two recommended options for running the game. Either download the VirtualBox
-image that comes with a complete Ubuntu 20.04 setup or add the necessary packages to
-your system to compile and run the game.
+There are two recommended options for running the game.
+Either use Ubuntu 24.04 and add the necessary packages to your system to compile and run the game.
+Or on any Linux distribution, use [Distrobox](https://github.com/89luca89/distrobox)
+to run an Ubuntu 24.04 distribution inside your terminal.
 
-#### Option 1 - Using VirtualBox
+#### Option 1 - Using your system
 
-First install VirtualBox on your system
-[VirtualBox wiki link](https://www.virtualbox.org/wiki/Downloads).
-
-Then download the Ubuntu 20.04 image that we have preconfigured with ROS and the
-necessary packages
-[Image link](https://drive.google.com/file/d/14XXwDKfOUH8pCh18CagoJmq6qFxY289Q/view?usp=share_link).
-
-Once downloaded add the image to your VirtualBox and boot up Ubuntu. The username and
-password are both **flyatest**.
-
-Note: You might have issues and latencies using VirtualBox, depending on your system and
-your OS.
-
-#### Option 2 - Using your system
-
-If you already have Ubuntu 20.04 on your system, great. If not, you can either install
+If you already have Ubuntu 24.04 on your system, great. If not, you can either install
 it on your machine (dual-boot or full installation) or boot from an USB flash drive.
 You can follow
 [Ubuntu tutorial: Install Ubuntu desktop](https://ubuntu.com/tutorials/install-ubuntu-desktop).
+
 If your system is running Windows 11, you can maybe try
-[Ubuntu tutorial: Install Ubuntu on WSL2 on Windows 11 with GUI support](https://ubuntu.com/tutorials/install-ubuntu-on-wsl2-on-windows-11-with-gui-support)
-(not tested).
+[Ubuntu tutorial: Install Ubuntu on WSL2 on Windows 11 with GUI support](https://ubuntu.com/tutorials/install-ubuntu-on-wsl2-on-windows-11-with-gui-support).
 
-Make sure ROS Noetic is installed by following the
-[ROS install guide](http://wiki.ros.org/noetic/Installation/Ubuntu).
+Then, make sure ROS2 Jazzy is installed by following the
+[ROS install guide](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html).
 
-Make sure Pygame for Python3 is installed:
+
+#### Option 2 - Using Distrobox
+
+First, install [Docker](https://docs.docker.com/engine/install/).
+
+Build an image with Ubuntu 24.04 and ROS 2 Jazzy from the ``./Dockerfile``:
 ```
-sudo apt install python3-pygame
-```
-
-### Setup the workspace
-
-Open a terminal and run:
-```
-mkdir flyappy_ws
-cd flyappy_ws
+docker build . -f Dockerfile -t flyappy
 ```
 
-Clone the repository in the source of the workspace:
+Then, install a recent version of Distrobox:
 ```
-git clone https://github.com/Flyability/flyappy_autonomy_test_public.git src/flyappy_autonomy_test_public
+git -C /tmp clone https://github.com/89luca89/distrobox.git
+cd /tmp/distrobox
+git checkout 1.8.0
+sudo ./install
 ```
 
-### Compilation
-
-At the root of the workspace, run the catkin_make command:
+Create a Distrobox image from the previously built docker image.
+The command takes around 2-3 minutes to complete and will ask to type
+a new password (twice):
 ```
-catkin_make --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+distrobox-create --name flyappy --image flyappy --home ~/.flyappy/ && distrobox enter flyappy -- bash -cl true
+```
+
+Now, you can enter the Distrobox whenever you need with:
+```
+distrobox enter flyappy --clean-path
+```
+
+Inside the image, you can install the python packages, run the game, build the C++ code,
+and run your code.
+You can still edit the code from your main distribution.
+
+
+### Setting up python environment
+
+Make sure python venv is installed:
+```
+sudo apt install python3.12-venv
+```
+
+Create a python virtual environment (with ROS2 packages available):
+```
+source /opt/ros/jazzy/setup.bash
+python3 -m venv .venv --system-site-packages
+```
+
+Activate the python virtual environment:
+```
+source .venv/bin/activate
+```
+
+Install the main game:
+```
+pip install ./flyappy_main_game
 ```
 
 ### Run The Game
 
-After compilation, at the root of the workspace, source the workspace in the terminal
-you want to run the game:
+To run the game, launch (inside the python virtual environment):
 ```
-source devel/setup.bash
-```
-
-There are two ROS launch files depending on if you want to run the game with C++ or
-Python autonomy code (whatever you prefer).
-
-For Python, run:
-```
-roslaunch flyappy_autonomy_code flyappy_autonomy_code_py.launch
+flyappy_main_game
 ```
 
-For C++, run:
-```
-roslaunch flyappy_autonomy_code flyappy_autonomy_code_cpp.launch
-```
-
-A GUI will become visible with the game start screen. For now the autonomy code does not
-do anything other than printing out some laser ray and end game information. To start
-the game, press any arrow key.
+A GUI will become visible with the game start screen.
 
 You can then add velocity in a wanted direction by pressing the arrow keys
 &larr;&uarr;&darr;&rarr;.
@@ -112,15 +121,57 @@ stops.
 Now that we have gotten familiar with the game, we want to control Flyappy autonomously.
 To do this, a Python and a C++ template have been provided.
 
+For now the autonomy code does not do anything other than printing out some laser ray and end
+game information. To start the game, press any arrow key.
+
+### Python
+
+Install the package (inside the python virtual environment):
+```
+pip install ./flyappy_autonomy_code_py
+```
+
+To run the automation code:
+```
+flyappy_autonomy_code_node
+```
+
+> [!TIP]
+> You can install in editable mode with the pip option ``-e``
+> to avoid installing every time you do a change in the Python code.
+
+### C++
+
+Compile the code:
+```
+cd flyappy_autonomy_code_cpp
+source /opt/ros/jazzy/setup.bash
+cmake --preset release
+cmake --build --preset release
+```
+
+To run the automation code:
+```
+./build/release/flyappy_autonomy_code_node
+```
+
+> [!TIP]
+> Unit tests can be run with:
+> ```
+> ctest --preset release
+> ```
+>
+> You can also compile in Debug mode with ``--preset debug``
+
 ### Modifying the code
 
-The templates are located in the **flyappy_autonomy_code** folder. Be aware that you
-are not meant to change the files in **flyappy_main_game**.
+The templates are located in the
+**flyappy_autonomy_code_cpp/** and **flyappy_autonomy_code_py/** folders.
+Be aware that you are not meant to change the files in **flyappy_main_game/**.
 
-For using python, modify the file **flyappy_autonomy_code_node.py** in the **scripts**
-folder, and add any Python files if needed.
+For using python, modify (or add) any files in the **src/**, **tests/** folders.
 
-For using C++, modify (or add) any files in the **include**, **src**, **tests** folders
+For using C++, modify (or add) any files in the **src/**, **tests/** folders
 and, if needed, the **CMakeLists.txt**.
 
 Take your pick.
@@ -147,11 +198,11 @@ folder. Here is some other helpful information for solving the task.
 * Max acceleration x: 3.0 m/s^2
 * Max acceleration y: 35.0 m/s^2
 * Axis convention: x &rarr;, y &uarr;
-* [LaserScan message definition](http://docs.ros.org/api/sensor_msgs/html/msg/LaserScan.html)
+* [LaserScan message definition](https://docs.ros.org/en/jazzy/p/sensor_msgs/interfaces/msg/LaserScan.html)
 
-| Value        | Unit           | Topic  |
-| ------------- |:-------------:| :-----:|
-| Velocity      | m/s           | /flyappy_vel |
-| Acceleration  | m/s^2         | /flyappy_acc |
-| LaserScan     | Radians, meters      | /flyappy_laser_scan |
-| GameEnded     | No unit      | /flyappy_game_ended |
+| Value        | Unit               | Topic               |
+| ------------- |:-----------------:| :------------------:|
+| Velocity      | m/s               | /flyappy_vel        |
+| Acceleration  | m/s^2             | /flyappy_acc        |
+| LaserScan     | Radians, meters   | /flyappy_laser_scan |
+| GameEnded     | No unit           | /flyappy_game_ended |

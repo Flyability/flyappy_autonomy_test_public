@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=69.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flyappy_autonomy_code"
+authors = [{ name = "Flyability", email = "auto_team@flyability.com" }]
+description = "Flyability Autonomy Test Game"
+license = { text = "FlyaPrivate" }
+requires-python = ">=3.12"
+version = "0.0.0"
+readme = "README.md"
+
+dependencies = ["rclpy"]
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov"]
+lint = [
+    "black",
+    "ruff",
+    "mypy",
+    "pytest", # required for mypy
+]
+dev = ["flyappy_autonomy_code[lint]", "flyappy_autonomy_code[test]"]
+
+[project.scripts]
+flyappy_autonomy_code_node = "flyappy_autonomy_code.flyappy_autonomy_code_node:main"
+
+######### TOOLS #########
+[tool.black]
+target-version = ["py312"]
+line-length = 90
+
+
+[tool.ruff]
+line-length = 90
+fix = true
+
+[tool.ruff.lint]
+fixable = ["I"]
+ignore = [
+    "E501", # black compatibility
+    "E203", # black compatibility
+]
+select = [
+    "F",   # pyflakes
+    "E",   # pycodestyle
+    "W",   # pycodestyle
+    "I",   # isort
+    "N",   # pep8-naming
+    "C90", # mccabe complexity
+
+    # Additional checks from ruff
+    "G",      # logging
+    "PTH",    # use pathlib
+    "PIE",    # flake8-pie
+    "TCH",    # type checking imports
+    "TID252", # relative imports
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["flyappy_main_game"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+
+[tool.mypy]
+# Logistics of what code to check and how to handle the data.
+scripts_are_modules = true
+show_traceback = true
+
+# Options to make the checking stricter.
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_any_generics = true
+warn_no_return = true
+strict_optional = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+# Display the codes needed for # type: ignore[code] annotations.
+show_error_codes = true
+
+# Warn of unreachable or redundant code.
+warn_unreachable = true
+
+exclude = ["venv/", "build/"]
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
+
+# We use some third-party libraries we don't have stubs for. Ignore them.
+[[tool.mypy.overrides]]
+module = [
+    "rclpy.*"
+]
+ignore_missing_imports = true

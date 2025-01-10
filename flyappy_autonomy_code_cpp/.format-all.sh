@@ -1,6 +1,6 @@
 # /bin/bash
 
-exclude_list="external"
+exclude_list=""
 all_files=$(git ls-files *.h *.hpp *.c *.cpp)
 
 for exclude in $exclude_list
@@ -9,4 +9,4 @@ do
 done
 
 echo "$all_files"
-clang-format-6.0 -i ${all_files}
+clang-format-18 -i ${all_files}

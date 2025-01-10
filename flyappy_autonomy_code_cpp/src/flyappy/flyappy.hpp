@@ -1,5 +1,8 @@
 #pragma once
 
+namespace flyappy
+{
+
 class Flyappy
 {
   public:
@@ -7,3 +10,5 @@ class Flyappy
 
   private:
 };
+
+}  // namespace flyappy

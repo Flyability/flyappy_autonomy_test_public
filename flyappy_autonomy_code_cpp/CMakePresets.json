@@ -1,0 +1,103 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 28,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "layout",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "installDir": "${sourceDir}/install/${presetName}",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true
+      }
+    },
+    {
+      "name": "toolchain-gcc-13-x86_64",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "/usr/bin/gcc-13",
+        "CMAKE_CXX_COMPILER": "/usr/bin/g++-13",
+        "CMAKE_CXX_STANDARD": "17",
+        "CMAKE_CXX_STANDARD_REQUIRED": true,
+        "CMAKE_CXX_EXTENSIONS": false
+      }
+    },
+    {
+      "name": "warnings-gcc",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_FLAGS": "-Wall -Wextra",
+        "CMAKE_CXX_FLAGS": "-Wall -Wextra"
+      }
+    },
+    {
+      "name": "gcc-13.3-x86_64",
+      "hidden": true,
+      "inherits": [
+        "layout",
+        "toolchain-gcc-13-x86_64",
+        "warnings-gcc"
+      ]
+    },
+
+    {
+      "name": "release",
+      "displayName": "'gcc-13.3-x86_64' release config",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "inherits": ["gcc-13.3-x86_64"]
+    },
+    {
+      "name": "debug",
+      "displayName": "'gcc-13.3-x86_64' debug config",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "inherits": ["gcc-13.3-x86_64"]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "release",
+      "displayName": "Release config",
+      "configurePreset": "release",
+      "jobs": 0
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug config",
+      "configurePreset": "debug",
+      "jobs": 0
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-options",
+      "hidden": true,
+      "execution": {
+        "jobs": 0
+      },
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release config",
+      "configurePreset": "release",
+      "inherits": ["test-options"]
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug config",
+      "configurePreset": "debug",
+      "inherits": ["test-options"]
+    }
+  ]
+}
